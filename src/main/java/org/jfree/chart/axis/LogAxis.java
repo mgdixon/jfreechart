@@ -919,6 +919,21 @@ public class LogAxis extends ValueAxis {
         log2 = log2 + adj;
         setRange(calculateValueNoINF(log1), calculateValueNoINF(log2));
     }
+
+    /**
+     * Overridden version that calls original and then handles the case where
+     * the range is below the minimum (1e-100).
+     *
+     * @param range  the new range.
+     */
+    @Override
+    public void setRange(Range range) {
+        super.setRange(range);      // call parent method
+        double lowerVal = range.getLowerBound();
+        if (lowerVal < smallestValue) {
+            setLowerBound(smallestValue);
+        }
+    }
     
     /**
      * Increases or decreases the axis range by the specified percentage about

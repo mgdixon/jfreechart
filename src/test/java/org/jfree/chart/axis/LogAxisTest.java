@@ -253,6 +253,38 @@ public class LogAxisTest {
     }
 
     /**
+     * Test for issue 215 - axis disappears with lowerbound set to 0.0
+     *
+     */
+    @Test
+    public void testSetLowerBoundZero() {
+        LogAxis axis = new LogAxis("X");
+        axis.setLowerBound(0.0);
+        assertEquals(0.0, axis.getLowerBound(), EPSILON);
+        // Actual lowerbound is 1e-100
+        assertEquals(1e-100, axis.getLowerBound(), 0);
+        assertEquals(1.0, axis.getUpperBound(), EPSILON);
+        assertEquals(1.0E-100, axis.getSmallestValue(), EPSILON);
+        assertTrue(axis.isTickMarksVisible());
+    }
+
+    /**
+     * Test graphically issue 215 - axis disappears with lowerbound set to 0.0
+     */
+    @Test
+    public void testTranslateJava2DToValueZeroBound() {
+        LogAxis axis = new LogAxis();
+        axis.setRange(1e-100, 10.0);
+        Rectangle2D dataArea = new Rectangle2D.Double(10.0, 50.0, 400.0, 300.0);
+        double y1 = axis.java2DToValue(5.0, dataArea, RectangleEdge.LEFT);
+        assertEquals(1.4125375446227266e16, y1, EPSILON);
+        axis.setLowerBound(0.0);
+        double y2 = axis.java2DToValue(5.0, dataArea, RectangleEdge.LEFT);
+        assertEquals(1.4125375446227266e16, y2, EPSILON);
+    }
+
+
+    /**
      * Checks the default value for the tickMarksVisible flag.
      */
     @Test
