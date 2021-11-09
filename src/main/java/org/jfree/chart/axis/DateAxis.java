@@ -1461,6 +1461,7 @@ public class DateAxis extends ValueAxis implements Cloneable, Serializable {
 
         DateTickUnit unit = getTickUnit();
         Date tickDate = calculateLowestVisibleTickValue(unit);
+        //Date tickDate = getMinimumDate();
         Date upperDate = getMaximumDate();
 
         boolean hasRolled = false;

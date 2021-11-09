@@ -40,6 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.jfree.data.time.*;
 import org.junit.jupiter.api.Test;
 
 import java.awt.Graphics2D;
@@ -57,28 +58,19 @@ import java.util.TimeZone;
 import org.jfree.chart.TestUtils;
 import org.jfree.chart.api.RectangleEdge;
 
-import org.jfree.data.time.DateRange;
-import org.jfree.data.time.Day;
-import org.jfree.data.time.Hour;
-import org.jfree.data.time.Millisecond;
-import org.jfree.data.time.Minute;
-import org.jfree.data.time.Month;
-import org.jfree.data.time.Second;
-import org.jfree.data.time.Year;
-
 /**
  * Tests for the {@link DateAxis} class.
  */
 public class DateAxisTest {
 
     static class MyDateAxis extends DateAxis {
-        
+
         private static final long serialVersionUID = 1L;
-        
+
         /**
          * Creates a new instance.
          *
-         * @param label  the label.
+         * @param label the label.
          */
         public MyDateAxis(String label) {
             super(label);
@@ -106,7 +98,7 @@ public class DateAxisTest {
         assertFalse(a1.equals(a2));
         a2 = new DateAxis("Test", TimeZone.getTimeZone("PST"), Locale.US);
         assertTrue(a1.equals(a2));
-        
+
         a1 = new DateAxis("Test", TimeZone.getTimeZone("PST"), Locale.FRANCE);
         assertFalse(a1.equals(a2));
         a2 = new DateAxis("Test", TimeZone.getTimeZone("PST"), Locale.FRANCE);
@@ -237,10 +229,9 @@ public class DateAxisTest {
     /**
      * Tests two doubles for 'near enough' equality.
      *
-     * @param d1  number 1.
-     * @param d2  number 2.
-     * @param tolerance  maximum tolerance.
-     *
+     * @param d1        number 1.
+     * @param d2        number 2.
+     * @param tolerance maximum tolerance.
      * @return A boolean.
      */
     private boolean same(double d1, double d2, double tolerance) {
@@ -1156,22 +1147,22 @@ public class DateAxisTest {
     }
 
     /**
-     * A test for bug 3484403 (SourceForge 
+     * A test for bug 3484403 (SourceForge
      * https://sourceforge.net/p/jfreechart/bugs/1078/).
      */
     @Test
     public void testBug3484403() {
 
         final long[] dates =
-            { 1304892000000L, 1304632800000L, 1304546400000L, 1304460000000L,
-              1304373600000L, 1304287200000L, 1320015600000L, 1309384800000L,
-              1319752800000L, 1319666400000L, 1319580000000L, 1319493600000L };
+                {1304892000000L, 1304632800000L, 1304546400000L, 1304460000000L,
+                        1304373600000L, 1304287200000L, 1320015600000L, 1309384800000L,
+                        1319752800000L, 1319666400000L, 1319580000000L, 1319493600000L};
         Arrays.sort(dates);
 
         DateAxis axis = new DateAxis("Date");
         // set start and end date
         Date start = new Date(dates[0]);
-        Date end = new Date(dates[dates.length-1]);
+        Date end = new Date(dates[dates.length - 1]);
         axis.setMinimumDate(start);
         axis.setMaximumDate(end);
 
@@ -1183,75 +1174,124 @@ public class DateAxisTest {
         // if the bug is still present, this leads to an endless loop
         axis.refreshTicks(g2, new AxisState(), area, RectangleEdge.BOTTOM);
     }
-    
+
     /**
      * Test for bug #25 at Github.
-     * 
+     * <p>
      * https://github.com/jfree/jfreechart/issues/25
-     * 
      */
     @Test
     public void testBug25() {
         TimeZone tz = TimeZone.getTimeZone("GMT");
         GregorianCalendar cal = new GregorianCalendar(tz, Locale.UK);
-        
+
         MyDateAxis axis = new MyDateAxis("25");
         axis.setTimeZone(tz);
-        
+
         // YEAR
         DateTickUnit ydtu = new DateTickUnit(DateTickUnitType.YEAR, 5);
         Year y = new Year(2015);
         long ymillis = y.getFirstMillisecond(cal); // 1420070400000L
         Date yprev = axis.previousStandardDate(new Date(ymillis), ydtu);
         assertEquals(new Year(2010).getFirstMillisecond(cal), yprev.getTime());
-        
+
         // MONTH 
         DateTickUnit mdtu = new DateTickUnit(DateTickUnitType.MONTH, 3);
         Month m = new Month(12, 2016);
-        long mmillis = m.getFirstMillisecond(cal); 
+        long mmillis = m.getFirstMillisecond(cal);
         Date mprev = axis.previousStandardDate(new Date(mmillis), mdtu);
-        assertEquals(new Month(9, 2016).getFirstMillisecond(cal), 
+        assertEquals(new Month(9, 2016).getFirstMillisecond(cal),
                 mprev.getTime());
-        
+
         // DAY
         DateTickUnit ddtu = new DateTickUnit(DateTickUnitType.DAY, 7);
         Day d = new Day(14, 1, 2016);
-        long dmillis = d.getFirstMillisecond(cal); 
+        long dmillis = d.getFirstMillisecond(cal);
         Date dprev = axis.previousStandardDate(new Date(dmillis), ddtu);
-        assertEquals(new Day(7, 1, 2016).getFirstMillisecond(cal), 
+        assertEquals(new Day(7, 1, 2016).getFirstMillisecond(cal),
                 dprev.getTime());
-        
+
         // HOUR
         DateTickUnit hdtu = new DateTickUnit(DateTickUnitType.HOUR, 6);
         Hour h = new Hour(18, 24, 8, 2016);
-        long hmillis = h.getFirstMillisecond(cal); 
+        long hmillis = h.getFirstMillisecond(cal);
         Date hprev = axis.previousStandardDate(new Date(hmillis), hdtu);
-        assertEquals(new Hour(12, 24, 8, 2016).getFirstMillisecond(cal), 
+        assertEquals(new Hour(12, 24, 8, 2016).getFirstMillisecond(cal),
                 hprev.getTime());
-        
+
         // MINUTE
         DateTickUnit mindtu = new DateTickUnit(DateTickUnitType.MINUTE, 5);
         Minute min = new Minute(10, 12, 24, 8, 2016);
         long minmillis = min.getFirstMillisecond(cal); // 1472040600000L GMT
         Date minprev = axis.previousStandardDate(new Date(minmillis), mindtu);
         assertEquals(1472040600000L - 5 * 60 * 1000L, minprev.getTime());
-        
+
         // SECOND 
         DateTickUnit sdtu = new DateTickUnit(DateTickUnitType.SECOND, 10);
         Second s = new Second(50, 30, 18, 24, 8, 2016);
-        long smillis = s.getFirstMillisecond(cal); 
+        long smillis = s.getFirstMillisecond(cal);
         Date sprev = axis.previousStandardDate(new Date(smillis), sdtu);
         assertEquals(new Second(40, 30, 18, 24, 8, 2016)
                 .getFirstMillisecond(cal), sprev.getTime());
-        
+
         // MILLISECOND
         DateTickUnit msdtu = new DateTickUnit(DateTickUnitType.MILLISECOND, 10);
         Millisecond ms = new Millisecond(500, 50, 30, 18, 24, 8, 2016);
-        long msmillis = ms.getFirstMillisecond(cal); 
+        long msmillis = ms.getFirstMillisecond(cal);
         Date msprev = axis.previousStandardDate(new Date(msmillis), msdtu);
         assertEquals(new Millisecond(490, 50, 30, 18, 24, 8, 2016)
                 .getFirstMillisecond(cal), msprev.getTime());
-        
+
     }
-    
+
+    /**
+     * Test for bug #25 at Github.
+     * <p>
+     * https://github.com/jfree/jfreechart/issues/25
+     */
+    @Test
+    public void testBug206() {
+
+        // Fall 2021 DST day was 11/7/2021
+        TimeZone tz = TimeZone.getTimeZone("PST");
+
+        MyDateAxis axis = new MyDateAxis("Bug 206");
+        axis.setTimeZone(tz);
+
+        Minute m0 = new Minute(0, 0, 7, 11, 2021);
+        Minute m1 = new Minute(0, 5, 7, 11, 2021);
+
+        Date d0 = new Date(m0.getFirstMillisecond());
+        Date end = new Date(m1.getLastMillisecond());
+
+        DateTickUnit unit = new DateTickUnit(DateTickUnitType.MILLISECOND, 10);
+        axis.setTickUnit(unit);
+
+        // START: check d0
+        axis.setTickMarkPosition(DateTickMarkPosition.START);
+
+        axis.setRange(d0, end);
+        Date psd = axis.previousStandardDate(d0, unit);
+        Date nsd = unit.addToDate(psd, TimeZone.getDefault());
+        assertTrue(psd.getTime() < d0.getTime());
+        assertTrue(nsd.getTime() >= d0.getTime());
+
+        // MIDDLE: check d0
+        axis.setTickMarkPosition(DateTickMarkPosition.MIDDLE);
+
+        axis.setRange(d0, end);
+        psd = axis.previousStandardDate(d0, unit);
+        nsd = unit.addToDate(psd, TimeZone.getDefault());
+        assertTrue(psd.getTime() < d0.getTime());
+        assertTrue(nsd.getTime() >= d0.getTime());
+
+        // END: check d0
+        axis.setTickMarkPosition(DateTickMarkPosition.END);
+
+        axis.setRange(d0, end);
+        psd = axis.previousStandardDate(d0, unit);
+        nsd = unit.addToDate(psd, TimeZone.getDefault());
+        assertTrue(psd.getTime() < d0.getTime());
+        assertTrue(nsd.getTime() >= d0.getTime());
+    }
 }
