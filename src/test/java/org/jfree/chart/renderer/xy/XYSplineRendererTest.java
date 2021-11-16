@@ -40,13 +40,28 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
+import java.awt.*;
 import java.awt.geom.Rectangle2D;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+import java.util.TimeZone;
 
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.api.RectangleInsets;
+import org.jfree.chart.axis.DateAxis;
+import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.TestUtils;
+import org.jfree.chart.axis.ValueAxis;
+import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.util.GradientPaintTransformType;
 import org.jfree.chart.util.StandardGradientPaintTransformer;
 import org.jfree.chart.internal.CloneUtils;
 import org.jfree.chart.api.PublicCloneable;
+import org.jfree.data.time.Month;
+import org.jfree.data.time.TimeSeries;
+import org.jfree.data.time.TimeSeriesCollection;
+import org.jfree.data.time.TimeTableXYDataset;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -124,6 +139,15 @@ public class XYSplineRendererTest {
     }
 
     /**
+     * Verify that the constructor that uses a Precision works
+     */
+    @Test
+    public void testPrecisionConstructor() {
+        XYSplineRenderer r1 = new XYSplineRenderer(15);
+        assertEquals(15, r1.getPrecision());
+    }
+
+    /**
      * Serialize an instance, restore it, and check for equality.
      */
     @Test
@@ -131,6 +155,46 @@ public class XYSplineRendererTest {
         XYSplineRenderer r1 = new XYSplineRenderer();
         XYSplineRenderer r2 = TestUtils.serialised(r1);
         assertEquals(r1, r2);
+    }
+
+    @Test
+    public void testBug210() {
+        TimeSeries s1 = new TimeSeries("L&G European Index Trust");
+        s1.add(new Month(2, 2001), 390.95);
+        s1.add(new Month(3, 2001), 371.80);
+        s1.add(new Month(4, 2001), 413.92);
+        s1.add(new Month(5, 2001), 321.47);
+        s1.add(new Month(6, 2001), 258.96);
+        s1.add(new Month(7, 2001), 197.32);
+        s1.add(new Month(8, 2001), 173.96);
+        s1.add(new Month(9, 2001), 488.99);
+        s1.add(new Month(10, 2001), 247.73);
+        s1.add(new Month(11, 2001), 454.94);
+        TimeSeriesCollection dataset = new TimeSeriesCollection();
+        dataset.addSeries(s1);
+
+        JFreeChart chart = ChartFactory.createTimeSeriesChart("A Title", "X", "Y", dataset, false, false, false);
+        XYSplineRenderer r = new XYSplineRenderer();
+
+        chart.setBackgroundPaint(Color.WHITE);
+
+        XYPlot plot = (XYPlot) chart.getPlot();
+        plot.setBackgroundPaint(Color.LIGHT_GRAY);
+        plot.setDomainGridlinePaint(Color.WHITE);
+        plot.setRangeGridlinePaint(Color.WHITE);
+        plot.setAxisOffset(new RectangleInsets(5.0, 5.0, 5.0, 5.0));
+        plot.setDomainCrosshairVisible(true);
+        plot.setRangeCrosshairVisible(true);
+
+        // New code
+        plot.setRenderer(r);
+
+        DateAxis axis = (DateAxis) plot.getDomainAxis();
+        axis.setDateFormatOverride(new SimpleDateFormat("MMM-yyyy"));
+        ValueAxis yAxis = (ValueAxis) plot.getRangeAxis();
+        assertEquals(127.142, yAxis.getLowerBound(), 1.0);
+        assertEquals(583.062, yAxis.getUpperBound(), 1.0);
+
     }
 
 }

@@ -57,6 +57,8 @@ import org.jfree.chart.util.GradientPaintTransformer;
 import org.jfree.chart.api.RectangleEdge;
 import org.jfree.chart.util.StandardGradientPaintTransformer;
 import org.jfree.chart.internal.Args;
+import org.jfree.data.Range;
+import org.jfree.data.general.DatasetUtils;
 import org.jfree.data.xy.XYDataset;
 
 /**
@@ -245,6 +247,7 @@ public class XYSplineRenderer extends XYLineAndShapeRenderer {
      */
     public void setGradientPaintTransformer(GradientPaintTransformer gpt) {
         this.gradientPaintTransformer = gpt;
+        // FIXME: Should notify that the visibility might have changed
         fireChangeEvent();
     }
     
@@ -272,6 +275,32 @@ public class XYSplineRenderer extends XYLineAndShapeRenderer {
         XYSplineState state = new XYSplineState(info);
         state.setProcessVisibleItemsOnly(false);
         return state;
+    }
+
+    /**
+     * Returns the range of values the renderer requires to display all the
+     * items from the specified dataset.
+     *
+     * @param dataset  the dataset ({@code null} permitted).
+     *
+     * Adding 20% to the bounds covers the issues with the spline renderer where it goes outside of
+     * the range. However, this is a hack. It should be fixed by iterating through all the intermediate
+     * points and finding the min/max
+     * FIXME
+     *
+     * @return The range ({@code null} if the dataset is {@code null}
+     *         or empty).
+     */
+    @Override
+    public Range findRangeBounds(XYDataset dataset) {
+        if (dataset == null) {
+            return null;
+        }
+        Range r = DatasetUtils.findRangeBounds(dataset, false);
+        if (r == null) {
+            return null;
+        }
+        return new Range(r.getLowerBound() * 0.85, r.getUpperBound() * 1.15);
     }
 
     /**
@@ -410,6 +439,7 @@ public class XYSplineRenderer extends XYLineAndShapeRenderer {
                         for (int j = 1; j <= this.precision; j++) {
                             t1 = (h[i] * j) / this.precision;
                             t2 = h[i] - t1;
+                            // If this y is below the axis can we repaint?
                             y = ((-a[i - 1] / 6 * (t2 + h[i]) * t1 + d[i - 1])
                                     * t2 + (-a[i] / 6 * (t1 + h[i]) * t2
                                     + d[i]) * t1) / h[i];
@@ -453,6 +483,7 @@ public class XYSplineRenderer extends XYLineAndShapeRenderer {
             // reset points vector
             s.points = new ArrayList<>();
         }
+
     }
     
     private void solveTridiag(float[] sub, float[] diag, float[] sup,
