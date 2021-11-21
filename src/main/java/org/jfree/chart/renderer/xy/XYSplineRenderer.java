@@ -283,10 +283,9 @@ public class XYSplineRenderer extends XYLineAndShapeRenderer {
      *
      * @param dataset  the dataset ({@code null} permitted).
      *
-     * Adding 20% to the bounds covers the issues with the spline renderer where it goes outside of
+     * Adding 15% to the bounds covers the issues with the spline renderer where it goes outside of
      * the range. However, this is a hack. It should be fixed by iterating through all the intermediate
      * points and finding the min/max
-     * FIXME
      *
      * @return The range ({@code null} if the dataset is {@code null}
      *         or empty).
@@ -300,6 +299,7 @@ public class XYSplineRenderer extends XYLineAndShapeRenderer {
         if (r == null) {
             return null;
         }
+        // New range is 85% to 115% of current bounds
         return new Range(r.getLowerBound() * 0.85, r.getUpperBound() * 1.15);
     }
 

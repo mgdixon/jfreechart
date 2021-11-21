@@ -140,6 +140,8 @@ public class XYSplineRendererTest {
 
     /**
      * Verify that the constructor that uses a Precision works
+     * {@link XYSplineRenderer} class specifically
+     * {@link XYSplineRenderer#XYSplineRenderer(int precision)}
      */
     @Test
     public void testPrecisionConstructor() {
@@ -157,6 +159,10 @@ public class XYSplineRendererTest {
         assertEquals(r1, r2);
     }
 
+    /**
+     * Tests for bug 210 where spline values exceed the axis in the
+     * {@link XYSplineRenderer} class
+     */
     @Test
     public void testBug210() {
         TimeSeries s1 = new TimeSeries("L&G European Index Trust");
@@ -186,7 +192,6 @@ public class XYSplineRendererTest {
         plot.setDomainCrosshairVisible(true);
         plot.setRangeCrosshairVisible(true);
 
-        // New code
         plot.setRenderer(r);
 
         DateAxis axis = (DateAxis) plot.getDomainAxis();
