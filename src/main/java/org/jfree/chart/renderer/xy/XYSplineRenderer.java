@@ -124,6 +124,11 @@ public class XYSplineRenderer extends XYLineAndShapeRenderer {
     private int precision;
 
     /**
+     * axisAdjustFactor scales up & down the axis to account for spline overshoot
+     */
+    private final double axisAdjustFactor = 0.15;
+
+    /**
      * A flag that can be set to specify 
      * to fill the area under the spline.
      */
@@ -300,7 +305,7 @@ public class XYSplineRenderer extends XYLineAndShapeRenderer {
             return null;
         }
         // New range is 85% to 115% of current bounds
-        return new Range(r.getLowerBound() * 0.85, r.getUpperBound() * 1.15);
+        return new Range(r.getLowerBound() * (1.0 - axisAdjustFactor), r.getUpperBound() * (1.0 + axisAdjustFactor));
     }
 
     /**
