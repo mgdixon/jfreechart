@@ -47,6 +47,7 @@ import java.util.Objects;
 import javax.swing.event.EventListenerList;
 
 import org.jfree.chart.internal.Args;
+import org.w3c.dom.events.Event;
 
 /**
  * Base class representing a data series.  Subclasses are left to implement the
@@ -71,7 +72,24 @@ public abstract class Series<K extends Comparable<K>>
     private String description;
 
     /** Storage for registered change listeners. */
-    private EventListenerList listeners;
+    private transient EventListenerList listeners;
+
+    /**
+     * getter method for listeners due to serialization/deserialization and transcience
+     *
+     * Because EventListenerList is transient we cannot just use it in different functions.
+     * After a serialization event it might have been zero'ed out, so a null exception
+     * would occur after promoting listeners to transient, a helper function was necessary
+     *
+     * @return EventListenerList
+     */
+    private EventListenerList getListeners()
+    {
+        if (listeners == null) {
+            listeners = new EventListenerList();
+        }
+        return listeners;
+    }
 
     /** Object to support property change notification. */
     private PropertyChangeSupport propertyChangeSupport;
@@ -295,7 +313,7 @@ public abstract class Series<K extends Comparable<K>>
      * @param listener  the listener to register.
      */
     public void addChangeListener(SeriesChangeListener listener) {
-        this.listeners.add(SeriesChangeListener.class, listener);
+        getListeners().add(SeriesChangeListener.class, listener);
     }
 
     /**
@@ -305,7 +323,7 @@ public abstract class Series<K extends Comparable<K>>
      * @param listener  the listener to deregister.
      */
     public void removeChangeListener(SeriesChangeListener listener) {
-        this.listeners.remove(SeriesChangeListener.class, listener);
+        getListeners().remove(SeriesChangeListener.class, listener);
     }
 
     /**
@@ -326,7 +344,7 @@ public abstract class Series<K extends Comparable<K>>
      */
     protected void notifyListeners(SeriesChangeEvent event) {
 
-        Object[] listenerList = this.listeners.getListenerList();
+        Object[] listenerList = getListeners().getListenerList();
         for (int i = listenerList.length - 2; i >= 0; i -= 2) {
             if (listenerList[i] == SeriesChangeListener.class) {
                 ((SeriesChangeListener) listenerList[i + 1]).seriesChanged(

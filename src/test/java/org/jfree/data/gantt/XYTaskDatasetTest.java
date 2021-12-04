@@ -36,19 +36,37 @@
 
 package org.jfree.data.gantt;
 
+import java.lang.reflect.Field;
 import java.util.Date;
 
 import org.jfree.chart.TestUtils;
 import org.jfree.chart.internal.CloneUtils;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.jfree.data.general.DatasetChangeEvent;
+import org.jfree.data.general.SeriesChangeEvent;
+import org.jfree.data.general.SeriesChangeListener;
+import org.jfree.data.general.DatasetChangeListener;
+import org.jfree.data.xy.YIntervalSeries;
 import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * Tests for the {@link XYTaskDataset} class.
  */
-public class XYTaskDatasetTest {
+public class XYTaskDatasetTest implements DatasetChangeListener {
+
+    DatasetChangeEvent lastEvent;
+
+    /**
+     * Records the last event.
+     *
+     * @param event the event.
+     */
+    @Override
+    public void datasetChanged(DatasetChangeEvent event) {
+        this.lastEvent = event;
+    }
 
     /**
      * Some checks for the equals() method.
@@ -133,4 +151,70 @@ public class XYTaskDatasetTest {
         assertTrue(d1.equals(d2));
     }
 
+    /**
+     * issue_249 was a bug where EventListenerList was not declared as transient.
+     * when the class was serialized and then deserialized it had problems
+     * this test just makes sure that the serialized version ends up with a
+     * listener list.
+     */
+    @Test
+    public void testBug_issue_249() {
+        TaskSeries<String> s1 = new TaskSeries<>("Series");
+        TaskSeriesCollection<String, String> u1 = new TaskSeriesCollection<>();
+        u1.add(s1);
+
+        // test basic serialization
+        XYTaskDataset d1 = new XYTaskDataset(u1);
+        XYTaskDataset d2 = TestUtils.serialised(d1);
+        assertEquals(d1, d2);
+
+        // make this class a listener
+        d2.addChangeListener(this);
+        assertNull(this.lastEvent);
+        assertTrue(s1.isEmpty());
+
+        // add a data item to the series
+        s1.add(new Task("Task 1", new Date(0L), new Date(1L)));
+        assertFalse(s1.isEmpty());
+
+        // add an item to the tasks (this will fail if serialization didn't work)
+        TaskSeriesCollection<String, String> u2 = d2.getTasks();
+        TaskSeries<String> s2 = u2.getSeries("Series");
+        s2.add(new Task("Task 2", new Date(10L), new Date(11L)));
+        assertFalse(d1.equals(d2));
+
+
+    }
+
+    /**
+     * this tests to make sure that after a serialization that the
+     * eventlisteners list is not null (issue 249). it uses reflection
+     * and the fact that this is a series to find the field.
+     */
+    @Test
+    public void testBug_issue_249_via_reflection() {
+        TaskSeries<String> s1 = new TaskSeries<>("Series");
+        TaskSeriesCollection<String, String> u1 = new TaskSeriesCollection<>();
+        u1.add(s1);
+
+        // test basic serialization
+        XYTaskDataset d1 = new XYTaskDataset(u1);
+        XYTaskDataset d2 = TestUtils.serialised(d1);
+        assertEquals(d1, d2);
+
+        // reflection is typically not suggested in junit tests
+        // uses reflection to get the listeners field and make sure it's not
+        // null
+        try {
+            Class s1class = s1.getClass().getSuperclass();
+            Field myfield = s1class.getDeclaredField("listeners");
+            myfield.setAccessible(true);
+            Object value = myfield.get(s1);
+            assertNotNull(value);
+        } catch (NoSuchFieldException e) {
+            fail("was looking for listeners in Series in reflection and failed");
+        } catch (IllegalAccessException e) {
+            fail("reflection failed");//
+        }
+    }
 }
