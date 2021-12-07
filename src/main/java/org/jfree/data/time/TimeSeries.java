@@ -1083,7 +1083,7 @@ public class TimeSeries<S extends Comparable<S>> extends Series<S>
      *         subclasses may differ.
      */
     @Override
-    public Object clone() throws CloneNotSupportedException {
+    public TimeSeries<S> clone() throws CloneNotSupportedException {
         TimeSeries<S> clone = (TimeSeries) super.clone();
         clone.data = CloneUtils.cloneList(this.data);
         return clone;

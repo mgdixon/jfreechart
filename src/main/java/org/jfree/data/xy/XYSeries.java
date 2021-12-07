@@ -854,7 +854,7 @@ public class XYSeries<K extends Comparable<K>> extends Series<K>
      */
     @Override 
     @SuppressWarnings("unchecked")
-    public Object clone() throws CloneNotSupportedException {
+    public XYSeries<K> clone() throws CloneNotSupportedException {
         XYSeries<K> clone = (XYSeries) super.clone();
         clone.data = CloneUtils.cloneList(this.data);
         return clone;

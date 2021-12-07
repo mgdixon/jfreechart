@@ -192,7 +192,7 @@ public class TaskSeries<K extends Comparable<K>> extends Series<K> {
      *     the dataset.
      */
     @Override
-    public Object clone() throws CloneNotSupportedException {
+    public TaskSeries clone() throws CloneNotSupportedException {
         TaskSeries clone = (TaskSeries) super.clone();
         clone.tasks = CloneUtils.cloneList(this.tasks);
         return clone;

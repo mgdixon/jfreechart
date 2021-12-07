@@ -465,8 +465,8 @@ public class TimePeriodValues<S extends Comparable<S>> extends Series<S>
      * @throws CloneNotSupportedException if there is a cloning problem.
      */
     @Override
-    public Object clone() throws CloneNotSupportedException {
-        Object clone = createCopy(0, getItemCount() - 1);
+    public TimePeriodValues<S> clone() throws CloneNotSupportedException {
+        TimePeriodValues<S> clone = createCopy(0, getItemCount() - 1);
         return clone;
     }
 

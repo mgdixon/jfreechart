@@ -47,7 +47,6 @@ import java.util.Objects;
 import javax.swing.event.EventListenerList;
 
 import org.jfree.chart.internal.Args;
-import org.w3c.dom.events.Event;
 
 /**
  * Base class representing a data series.  Subclasses are left to implement the
@@ -73,23 +72,6 @@ public abstract class Series<K extends Comparable<K>>
 
     /** Storage for registered change listeners. */
     private transient EventListenerList listeners;
-
-    /**
-     * getter method for listeners due to serialization/deserialization and transcience
-     *
-     * Because EventListenerList is transient we cannot just use it in different functions.
-     * After a serialization event it might have been zero'ed out, so a null exception
-     * would occur after promoting listeners to transient, a helper function was necessary
-     *
-     * @return EventListenerList
-     */
-    private EventListenerList getListeners()
-    {
-        if (listeners == null) {
-            listeners = new EventListenerList();
-        }
-        return listeners;
-    }
 
     /** Object to support property change notification. */
     private PropertyChangeSupport propertyChangeSupport;
@@ -123,6 +105,23 @@ public abstract class Series<K extends Comparable<K>>
         this.propertyChangeSupport = new PropertyChangeSupport(this);
         this.vetoableChangeSupport = new VetoableChangeSupport(this);
         this.notify = true;
+    }
+
+    /**
+     * getter method for listeners due to serialization/deserialization and transcience
+     *
+     * Because EventListenerList is transient we cannot just use it in different functions.
+     * After a serialization event it might have been zero'ed out, so a null exception
+     * would occur after promoting listeners to transient, a helper function was necessary
+     *
+     * @return EventListenerList
+     */
+    private EventListenerList getListeners()
+    {
+        if (listeners == null) {
+            listeners = new EventListenerList();
+        }
+        return listeners;
     }
 
     /**
@@ -254,7 +253,7 @@ public abstract class Series<K extends Comparable<K>>
      *         subclasses may differ.
      */
     @Override
-    public Object clone() throws CloneNotSupportedException {
+    public Series<K> clone() throws CloneNotSupportedException {
         @SuppressWarnings("unchecked")
         Series<K> clone = (Series) super.clone();
         clone.listeners = new EventListenerList();
@@ -313,7 +312,8 @@ public abstract class Series<K extends Comparable<K>>
      * @param listener  the listener to register.
      */
     public void addChangeListener(SeriesChangeListener listener) {
-        getListeners().add(SeriesChangeListener.class, listener);
+        EventListenerList listeners = getListeners();
+        listeners.add(SeriesChangeListener.class, listener);
     }
 
     /**
