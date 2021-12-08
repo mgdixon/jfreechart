@@ -927,9 +927,9 @@ public class LogAxis extends ValueAxis {
      * @param range  the new range.
      */
     @Override
-    public void setRange(Range range) {
+    public void setRange(final Range range) {
         super.setRange(range);      // call parent method
-        double lowerVal = range.getLowerBound();
+        final double lowerVal = range.getLowerBound();
         if (lowerVal < smallestValue) {
             setLowerBound(smallestValue);
         }
