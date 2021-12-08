@@ -126,7 +126,7 @@ public class XYSplineRenderer extends XYLineAndShapeRenderer {
     /**
      * axisAdjustFactor scales up & down the axis to account for spline overshoot
      */
-    private final double axisAdjustFactor = 0.15;
+    private static final double axisAdjustFactor = 0.15;
 
     /**
      * A flag that can be set to specify 
