@@ -75,6 +75,24 @@ import org.jfree.data.xy.XYDataset;
 public class XYSplineRenderer extends XYLineAndShapeRenderer {
 
     /**
+     * Resolution of splines (number of line segments between points)
+     */
+    private int precision;
+
+    /**
+     * axisAdjustFactor scales up & down the axis to account for spline overshoot
+     */
+    private static final double AXISADJUSTFACTOR = 0.15;
+
+    /**
+     * A flag that can be set to specify
+     * to fill the area under the spline.
+     */
+    private FillType fillType;
+
+    private GradientPaintTransformer gradientPaintTransformer;
+
+    /**
      * An enumeration of the fill types for the renderer.
      * 
      * @since 1.0.17
@@ -118,24 +136,7 @@ public class XYSplineRenderer extends XYLineAndShapeRenderer {
         }
     }
     
-    /**
-     * Resolution of splines (number of line segments between points)
-     */
-    private int precision;
 
-    /**
-     * axisAdjustFactor scales up & down the axis to account for spline overshoot
-     */
-    private static final double axisAdjustFactor = 0.15;
-
-    /**
-     * A flag that can be set to specify 
-     * to fill the area under the spline.
-     */
-    private FillType fillType;
-
-    private GradientPaintTransformer gradientPaintTransformer;
-    
     /**
      * Creates a new instance with the precision attribute defaulting to 5 
      * and no fill of the area 'under' the spline.
@@ -284,28 +285,23 @@ public class XYSplineRenderer extends XYLineAndShapeRenderer {
 
     /**
      * Returns the range of values the renderer requires to display all the
-     * items from the specified dataset.
+     * items from the specified dataset. Adds margin.
      *
      * @param dataset  the dataset ({@code null} permitted).
-     *
-     * Adding 15% to the bounds covers the issues with the spline renderer where it goes outside of
-     * the range. However, this is a hack. It should be fixed by iterating through all the intermediate
-     * points and finding the min/max
-     *
      * @return The range ({@code null} if the dataset is {@code null}
      *         or empty).
      */
     @Override
-    public Range findRangeBounds(XYDataset dataset) {
+    public Range findRangeBounds(final XYDataset dataset) {
         if (dataset == null) {
             return null;
         }
-        Range r = DatasetUtils.findRangeBounds(dataset, false);
-        if (r == null) {
+        Range currentRange = DatasetUtils.findRangeBounds(dataset, false);
+        if (currentRange == null) {
             return null;
         }
         // New range is 85% to 115% of current bounds
-        return new Range(r.getLowerBound() * (1.0 - axisAdjustFactor), r.getUpperBound() * (1.0 + axisAdjustFactor));
+        return Range.expand(currentRange, AXISADJUSTFACTOR, AXISADJUSTFACTOR);
     }
 
     /**

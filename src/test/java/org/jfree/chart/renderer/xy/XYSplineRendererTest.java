@@ -197,8 +197,8 @@ public class XYSplineRendererTest {
         DateAxis axis = (DateAxis) plot.getDomainAxis();
         axis.setDateFormatOverride(new SimpleDateFormat("MMM-yyyy"));
         ValueAxis yAxis = (ValueAxis) plot.getRangeAxis();
-        assertEquals(127.142, yAxis.getLowerBound(), 1.0);
-        assertEquals(583.062, yAxis.getUpperBound(), 1.0);
+        assertEquals(106.229, yAxis.getLowerBound(), 1.0);
+        assertEquals(556.721, yAxis.getUpperBound(), 1.0);
 
     }
 
