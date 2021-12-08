@@ -74,10 +74,10 @@ public abstract class Series<K extends Comparable<K>>
     private transient EventListenerList listeners;
 
     /** Object to support property change notification. */
-    private PropertyChangeSupport propertyChangeSupport;
+    private transient PropertyChangeSupport propertyChangeSupport;
 
     /** Object to support property change notification. */
-    private VetoableChangeSupport vetoableChangeSupport;
+    private transient VetoableChangeSupport vetoableChangeSupport;
 
     /** A flag that controls whether or not changes are notified. */
     private boolean notify;
@@ -87,7 +87,7 @@ public abstract class Series<K extends Comparable<K>>
      *
      * @param key  the series key ({@code null} not permitted).
      */
-    protected Series(K key) {
+    protected Series(final K key) {
         this(key, null);
     }
 
@@ -97,7 +97,7 @@ public abstract class Series<K extends Comparable<K>>
      * @param key  the series key ({@code null} NOT permitted).
      * @param description  the series description ({@code null} permitted).
      */
-    protected Series(K key, String description) {
+    protected Series(final K key, final String description) {
         Args.nullNotPermitted(key, "key");
         this.key = key;
         this.description = description;
@@ -107,21 +107,14 @@ public abstract class Series<K extends Comparable<K>>
         this.notify = true;
     }
 
-    /**
-     * getter method for listeners due to serialization/deserialization and transcience
-     *
-     * Because EventListenerList is transient we cannot just use it in different functions.
-     * After a serialization event it might have been zero'ed out, so a null exception
-     * would occur after promoting listeners to transient, a helper function was necessary
-     *
-     * @return EventListenerList
+    /*
+     * checks to make sure listeners has been initialized
      */
-    private EventListenerList getListeners()
+    private void checkListeners()
     {
         if (listeners == null) {
             listeners = new EventListenerList();
         }
-        return listeners;
     }
 
     /**
@@ -146,9 +139,9 @@ public abstract class Series<K extends Comparable<K>>
      *
      * @see #getKey()
      */
-    public void setKey(K key) {
+    public void setKey(final K key) {
         Args.nullNotPermitted(key, "key");
-        K old = this.key;
+        final K old = this.key;
         try {
             // if this series belongs to a dataset, the dataset might veto the
             // change if it results in two series within the dataset having the
@@ -182,8 +175,8 @@ public abstract class Series<K extends Comparable<K>>
      *
      * @see #getDescription()
      */
-    public void setDescription(String description) {
-        String old = this.description;
+    public void setDescription(final String description) {
+        final String old = this.description;
         this.description = description;
         this.propertyChangeSupport.firePropertyChange("Description", old,
                 description);
@@ -197,7 +190,7 @@ public abstract class Series<K extends Comparable<K>>
      *
      * @see #setNotify(boolean)
      */
-    public boolean getNotify() {
+    public boolean canNotify() {
         return this.notify;
     }
 
@@ -207,9 +200,9 @@ public abstract class Series<K extends Comparable<K>>
      *
      * @param notify  the new value of the flag.
      *
-     * @see #getNotify()
+     * @see #canNotify()
      */
-    public void setNotify(boolean notify) {
+    public void setNotify(final boolean notify) {
         if (this.notify != notify) {
             this.notify = notify;
             fireSeriesChanged();
@@ -255,7 +248,7 @@ public abstract class Series<K extends Comparable<K>>
     @Override
     public Series<K> clone() throws CloneNotSupportedException {
         @SuppressWarnings("unchecked")
-        Series<K> clone = (Series) super.clone();
+        final Series<K> clone = (Series) super.clone();
         clone.listeners = new EventListenerList();
         clone.propertyChangeSupport = new PropertyChangeSupport(clone);
         clone.vetoableChangeSupport = new VetoableChangeSupport(clone);
@@ -282,10 +275,7 @@ public abstract class Series<K extends Comparable<K>>
         if (!getKey().equals(that.getKey())) {
             return false;
         }
-        if (!Objects.equals(getDescription(), that.getDescription())) {
-            return false;
-        }
-        return true;
+        return Objects.equals(getDescription(), that.getDescription());
     }
 
     /**
@@ -311,8 +301,8 @@ public abstract class Series<K extends Comparable<K>>
      *
      * @param listener  the listener to register.
      */
-    public void addChangeListener(SeriesChangeListener listener) {
-        EventListenerList listeners = getListeners();
+    public void addChangeListener(final SeriesChangeListener listener) {
+        checkListeners();
         listeners.add(SeriesChangeListener.class, listener);
     }
 
@@ -322,8 +312,9 @@ public abstract class Series<K extends Comparable<K>>
      *
      * @param listener  the listener to deregister.
      */
-    public void removeChangeListener(SeriesChangeListener listener) {
-        getListeners().remove(SeriesChangeListener.class, listener);
+    public void removeChangeListener(final SeriesChangeListener listener) {
+        checkListeners();
+        listeners.remove(SeriesChangeListener.class, listener);
     }
 
     /**
@@ -342,16 +333,16 @@ public abstract class Series<K extends Comparable<K>>
      * @param event  contains information about the event that triggered the
      *               notification.
      */
-    protected void notifyListeners(SeriesChangeEvent event) {
+    protected void notifyListeners(final SeriesChangeEvent event) {
 
-        Object[] listenerList = getListeners().getListenerList();
+        checkListeners();
+        final Object[] listenerList = listeners.getListenerList();
         for (int i = listenerList.length - 2; i >= 0; i -= 2) {
             if (listenerList[i] == SeriesChangeListener.class) {
                 ((SeriesChangeListener) listenerList[i + 1]).seriesChanged(
                         event);
             }
         }
-
     }
 
     /**
@@ -359,7 +350,7 @@ public abstract class Series<K extends Comparable<K>>
      *
      * @param listener  the listener.
      */
-    public void addPropertyChangeListener(PropertyChangeListener listener) {
+    public void addPropertyChangeListener(final PropertyChangeListener listener) {
         this.propertyChangeSupport.addPropertyChangeListener(listener);
     }
 
@@ -368,7 +359,7 @@ public abstract class Series<K extends Comparable<K>>
      *
      * @param listener  the listener.
      */
-    public void removePropertyChangeListener(PropertyChangeListener listener) {
+    public void removePropertyChangeListener(final PropertyChangeListener listener) {
         this.propertyChangeSupport.removePropertyChangeListener(listener);
     }
 
@@ -379,8 +370,8 @@ public abstract class Series<K extends Comparable<K>>
      * @param oldValue  the old value.
      * @param newValue  the new value.
      */
-    protected void firePropertyChange(String property, Object oldValue,
-            Object newValue) {
+    protected void firePropertyChange(final String property, final Object oldValue,
+            final Object newValue) {
         this.propertyChangeSupport.firePropertyChange(property, oldValue,
                 newValue);
     }
@@ -392,7 +383,7 @@ public abstract class Series<K extends Comparable<K>>
      * 
      * @since 1.0.14
      */
-    public void addVetoableChangeListener(VetoableChangeListener listener) {
+    public void addVetoableChangeListener(final VetoableChangeListener listener) {
         this.vetoableChangeSupport.addVetoableChangeListener(listener);
     }
 
@@ -403,7 +394,7 @@ public abstract class Series<K extends Comparable<K>>
      * 
      * @since 1.0.14 
      */
-    public void removeVetoableChangeListener(VetoableChangeListener listener) {
+    public void removeVetoableChangeListener(final VetoableChangeListener listener) {
         this.vetoableChangeSupport.removeVetoableChangeListener(listener);
     }    
 
@@ -416,8 +407,8 @@ public abstract class Series<K extends Comparable<K>>
      * 
      * @throws PropertyVetoException if the change was vetoed.
      */
-    protected void fireVetoableChange(String property, Object oldValue,
-            Object newValue) throws PropertyVetoException {
+    protected void fireVetoableChange(final String property, final Object oldValue,
+            final Object newValue) throws PropertyVetoException {
         this.vetoableChangeSupport.fireVetoableChange(property, oldValue,
                 newValue);
     }
