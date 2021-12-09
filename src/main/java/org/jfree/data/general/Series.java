@@ -107,6 +107,8 @@ public abstract class Series<K extends Comparable<K>>
         this.notify = true;
     }
 
+    //CS427 Issue Link: https://github.com/jfree/jfreechart/issues/249
+
     /*
      * checks to make sure listeners has been initialized
      */

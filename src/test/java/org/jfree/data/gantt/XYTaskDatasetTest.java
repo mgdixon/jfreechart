@@ -58,6 +58,8 @@ public class XYTaskDatasetTest implements DatasetChangeListener {
 
     DatasetChangeEvent lastEvent;
 
+    //CS427 Issue Link: https://github.com/jfree/jfreechart/issues/249
+
     /**
      * Records the last event.
      *
@@ -151,6 +153,8 @@ public class XYTaskDatasetTest implements DatasetChangeListener {
         assertTrue(d1.equals(d2));
     }
 
+    //CS427 Issue Link: https://github.com/jfree/jfreechart/issues/249
+
     /**
      * issue_249 was a bug where EventListenerList was not declared as transient.
      * when the class was serialized and then deserialized it had problems
@@ -186,6 +190,10 @@ public class XYTaskDatasetTest implements DatasetChangeListener {
 
     }
 
+
+    //CS427 Issue Link: https://github.com/jfree/jfreechart/issues/249
+
+    
     /**
      * this tests to make sure that after a serialization that the
      * eventlisteners list is not null (issue 249). it uses reflection
