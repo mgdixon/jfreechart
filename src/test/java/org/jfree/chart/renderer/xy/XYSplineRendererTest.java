@@ -138,6 +138,8 @@ public class XYSplineRendererTest {
         assertTrue(r1 instanceof PublicCloneable);
     }
 
+    //CS427 Issue Link: https://github.com/jfree/jfreechart/issues/210
+
     /**
      * Verify that the constructor that uses a Precision works
      * {@link XYSplineRenderer} class specifically
@@ -158,6 +160,8 @@ public class XYSplineRendererTest {
         XYSplineRenderer r2 = TestUtils.serialised(r1);
         assertEquals(r1, r2);
     }
+
+    //CS427 Issue Link: https://github.com/jfree/jfreechart/issues/210
 
     /**
      * Tests for bug 210 where spline values exceed the axis in the

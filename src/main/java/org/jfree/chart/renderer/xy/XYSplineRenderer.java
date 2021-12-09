@@ -283,6 +283,8 @@ public class XYSplineRenderer extends XYLineAndShapeRenderer {
         return state;
     }
 
+    //CS427 Issue Link: https://github.com/jfree/jfreechart/issues/210
+
     /**
      * Returns the range of values the renderer requires to display all the
      * items from the specified dataset. Adds margin.
