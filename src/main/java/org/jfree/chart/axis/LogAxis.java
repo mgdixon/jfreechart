@@ -920,6 +920,8 @@ public class LogAxis extends ValueAxis {
         setRange(calculateValueNoINF(log1), calculateValueNoINF(log2));
     }
 
+    // CS427 Issue link: https://github.com/jfree/jfreechart/issues/215
+
     /**
      * Overridden version that calls original and then handles the case where
      * the range is below the minimum (1e-100).

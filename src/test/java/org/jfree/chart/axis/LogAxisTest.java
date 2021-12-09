@@ -252,6 +252,8 @@ public class LogAxisTest {
         assertEquals(11.0, axis.getUpperBound(), EPSILON);
     }
 
+    // CS427 Issue link: https://github.com/jfree/jfreechart/issues/215
+
     /**
      * Test for issue 215 - axis disappears with lowerbound set to 0.0
      *
@@ -267,6 +269,8 @@ public class LogAxisTest {
         assertEquals(1.0E-100, axis.getSmallestValue(), EPSILON);
         assertTrue(axis.isTickMarksVisible());
     }
+
+    // CS427 Issue link: https://github.com/jfree/jfreechart/issues/215
 
     /**
      * Test graphically issue 215 - axis disappears with lowerbound set to 0.0
